@@ -8,80 +8,93 @@
 <h1>Registro Generos</h1>
 <br />
 
-    <div class="container">
-        <label for="Nombre" class="col-sm-4 col-form-label">Nombre del Genero</label>
-        <input type="text" id="Nombre" class="form-check" @bind="generos.Nombre" />
+<div class="container">
+    <label for="Nombre" class="col-sm-4 col-form-label">Nombre del Genero</label>
+    <input type="text" id="Nombre" class="form-check" @bind="genero.Nombre" />
+    <button class="btn btn-success col-sm-2" @onclick="Guardar">Guardar</button>
+</div>
 
-    </div>
 
 
-    <br />
 
-    <div class="form-group">
-        <button type="button" class="col-md-offset-2 btn btn-success" @onclick="Guardar">Guardar</button>
-    </div>
+
+
 
 
     @code {
 
+    [Parameter]
+    public int Id { get; set; }
+    public string Validacion { get; set; }
 
-        [Parameter]
-        public int Id { get; set; }
-        public string Mensaje { get; set; }
+    Genero genero = new Genero();
 
-        Genero generos = new Genero();
+    protected override void OnInitialized()
+    {
 
+        Validacion = string.Empty;
 
-
-        private bool Validacion()
+        RepositorioBase<Genero> db = new RepositorioBase<Genero>();
+        try
         {
-            bool paso = true;
-
-            if (string.IsNullOrEmpty(generos.Nombre))
+            if (Id != 0)
             {
+                genero = db.Buscar(Id);
+            }
+        }
+        catch (Exception) { throw; }
 
-                paso = false;
+    }
 
+    private void Guardar()
+    {
+        RepositorioBase<Genero> db = new RepositorioBase<Genero>();
+        try
+        {
+            if(string.IsNullOrEmpty(genero.Nombre))
+            {
+                return;
             }
 
-            return paso;
-
-        }
-
-        private void Limpiar()
-        {
-            generos.Nombre = string.Empty;
-        }
-
-        private void Guardar()
-        {
-            RepositorioBase<Genero> db = new RepositorioBase<Genero>();
-            try
+            if(string.IsNullOrWhiteSpace(genero.Nombre))
             {
+                return;
+            }
 
-
-                if (string.IsNullOrEmpty(generos.Nombre))
+            if (genero.GeneroId > 0)
+            {
+                Modificar();
+            }
+            else
+            {
+                if (db.Guardar(genero))
                 {
-                    return;
+                    genero = new Genero();
+                    genero.Nombre = string.Empty;
                 }
 
+            }
+        }
+        catch (Exception) { throw; }
 
-                if (db.Guardar(generos))
-                {
-                    Limpiar();
+    }
 
-                }
+    private void Modificar()
+    {
+        RepositorioBase<Genero> db = new RepositorioBase<Genero>();
+        try
+        {
 
+            if (db.Modificar(genero))
+            {
+
+                genero = new Genero();
+                genero.Nombre = string.Empty;
 
             }
-           catch (Exception)
-           {
-            throw;
-            }
-
-
-
 
         }
+        catch (Exception) { throw; }
+    }
 
     }
